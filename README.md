@@ -15,7 +15,14 @@ If you run a small business in India, you know the drill: a folder full of GST i
 - Exports to Excel with one sheet per party, appending new invoices as rows, and highlighting low-confidence rows in yellow
 - Runs entirely on your machine — no internet connection needed, no data ever leaves your PC. Works fine on a low-end laptop (no GPU required)
 
-## Getting started
+## Download
+
+**[⬇ Download for Windows](../../releases/latest)** — grab `GST-Invoice-Extractor.exe` from the latest release, no Python or setup required. Just run it.
+
+If you'll be processing **scanned PDFs or phone photos**, also install [Tesseract OCR](https://github.com/UB-Mannheim/tesseract/wiki) (digital PDFs work fine without it).
+
+<details>
+<summary>Running from source instead (for developers)</summary>
 
 **Requirements:** Windows, Python 3.8+
 
@@ -24,7 +31,9 @@ install.bat
 python main.py
 ```
 
-`install.bat` installs the Python packages. If you'll be processing **scanned PDFs or phone photos**, also install [Tesseract OCR](https://github.com/UB-Mannheim/tesseract/wiki) (digital PDFs work fine without it).
+`install.bat` installs the Python packages. To build your own `.exe`, run `build.bat`.
+
+</details>
 
 ## How to use it
 
