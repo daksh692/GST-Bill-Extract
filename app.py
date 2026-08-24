@@ -5,6 +5,8 @@ UI never freezes on an Intel i3.
 """
 
 import os
+import json
+import shutil
 import threading
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
@@ -13,6 +15,11 @@ from datetime import datetime
 import pdf_processor
 import extractor
 import excel_manager
+
+# Folder where "Flag for Fix" saves a copy of a bill + its extraction, so a
+# user hitting a bad extraction can zip this up and attach it to a GitHub
+# issue for a new format/pattern to be added.
+FLAGGED_DIR = "flagged_bills"
 
 # ══════════════════════════════════════════════════════════════════════════════
 #  CONSTANTS / THEME
@@ -563,7 +570,12 @@ class InvoiceApp:
         self._btn_export = ttk.Button(btn_row, text="💾  Export to Excel",
                                       command=self._export_to_excel,
                                       state="disabled")
-        self._btn_export.pack(side="left")
+        self._btn_export.pack(side="left", padx=(0, 8))
+
+        self._btn_flag = ttk.Button(btn_row, text="🚩  Flag for Fix",
+                                    command=self._flag_bill,
+                                    state="disabled")
+        self._btn_flag.pack(side="left")
 
     # ── Status bar ────────────────────────────────────────────────────────────
 
@@ -715,6 +727,7 @@ class InvoiceApp:
         self._btn_revalidate.config(state="normal")
         self._btn_copy.config(state="normal")
         self._btn_export.config(state="normal")
+        self._btn_flag.config(state="normal")
 
     # ── Treeview row management ───────────────────────────────────────────────
 
@@ -880,6 +893,44 @@ class InvoiceApp:
             messagebox.showerror("Export Failed", msg, parent=self.root)
             self._set_status(msg, "error")
 
+    # ── Flag for fix ──────────────────────────────────────────────────────────
+
+    def _flag_bill(self):
+        """
+        Save a copy of the loaded PDF/photo plus what was extracted (and any
+        corrections made in the UI) into a local folder. The user zips that
+        folder and attaches it to a GitHub issue so a new pattern/vendor
+        format can be added.
+        """
+        if not self._pdf_path or not self._data:
+            return
+        try:
+            stamp  = datetime.now().strftime("%Y%m%d_%H%M%S")
+            base   = os.path.splitext(os.path.basename(self._pdf_path))[0]
+            folder = os.path.join(FLAGGED_DIR, f"{stamp}_{base}")
+            os.makedirs(folder, exist_ok=True)
+            shutil.copy2(self._pdf_path, folder)
+
+            report = {
+                "original_extraction": self._data,
+                "corrected_by_user":   self._collect_current_data(),
+            }
+            report_path = os.path.join(folder, "extraction_report.json")
+            with open(report_path, "w", encoding="utf-8") as f:
+                json.dump(report, f, indent=2, ensure_ascii=False, default=str)
+        except OSError as exc:
+            messagebox.showerror("Flag Failed", str(exc), parent=self.root)
+            return
+
+        messagebox.showinfo(
+            "Bill Flagged",
+            f"Saved to:\n{os.path.abspath(folder)}\n\n"
+            f"To report it: zip the '{FLAGGED_DIR}' folder and attach it to "
+            "a GitHub issue on the project page.",
+            parent=self.root,
+        )
+        self._set_status(f"Flagged — saved to {folder}", "ok")
+
     # ── Clear all ─────────────────────────────────────────────────────────────
 
     def _clear_all(self):
@@ -896,6 +947,7 @@ class InvoiceApp:
         self._btn_revalidate.config(state="disabled")
         self._btn_copy.config(state="disabled")
         self._btn_export.config(state="disabled")
+        self._btn_flag.config(state="disabled")
         self._sv["bill_type"] = tk.StringVar(value="Sales")
         self._set_status("Cleared — load a new PDF or photo.", "normal")
 
