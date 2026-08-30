@@ -17,9 +17,11 @@ If you run a small business in India, you know the drill: a folder full of GST i
 
 ## Download
 
-**[⬇ Download for Windows](../../releases/latest)** — grab `GST-Invoice-Extractor.exe` from the latest release, no Python or setup required. Just run it.
+**[⬇ Download for Windows](../../releases/latest)** — grab the `.zip` from the latest release, extract it, and run `GST-Invoice-Extractor.exe` inside. No Python or setup required.
 
 If you'll be processing **scanned PDFs or phone photos**, also install [Tesseract OCR](https://github.com/UB-Mannheim/tesseract/wiki) (digital PDFs work fine without it).
+
+> **First run:** Windows will likely show a blue "Windows protected your PC" (SmartScreen) screen the first time you open it — that's normal for any small, unsigned app, not a sign of a problem. Click **More info → Run anyway**. If Windows Defender flags or deletes the file entirely (not just a SmartScreen warning), see [Antivirus false positives](#antivirus-false-positives) below.
 
 <details>
 <summary>Running from source instead (for developers)</summary>
@@ -66,6 +68,17 @@ The single most useful thing you can do is send in the bills that extract badly 
 That gives a maintainer everything needed to write a new pattern: the exact bill layout and what the correct values should have been — no guesswork.
 
 Other ways to help: report bugs, suggest formats you'd like supported, or open a PR if you're comfortable with Python and regex — the pattern lists live in `extractor.py` and are grouped by field (invoice number, dates, names, addresses, line items).
+
+## Antivirus false positives
+
+Some antivirus tools — including Windows Defender — may flag this app as something like `Trojan:Win32/Wacatac.B!ml`. The `!ml` suffix means it's a **machine-learning heuristic guess, not a real detection** — it's a well-known false positive that hits small, unsigned Python apps built with PyInstaller, because the tool that packages Python apps into a `.exe` uses the same kind of self-extracting behaviour that real malware droppers use. It is **not actually a virus**; the source code is public in this repo for anyone to check.
+
+If it happens to you:
+- If Defender only shows a warning, choose "Allow on device" / restore the file from quarantine.
+- If you want independent confirmation before trusting that, you can scan the downloaded file on [VirusTotal](https://www.virustotal.com/) — expect a small number of heuristic engines to flag it and the well-known antivirus engines to show it as clean.
+- If it keeps getting deleted, add an exclusion for the extracted folder in Windows Security → Virus & threat protection → Manage settings → Exclusions.
+
+This is a limitation of not having a paid code-signing certificate, not of the app itself — will be resolved if/when the project gets one.
 
 ## Privacy
 
