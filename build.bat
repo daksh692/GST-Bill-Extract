@@ -14,8 +14,14 @@ python -m pip install --quiet --upgrade pip
 python -m pip install --quiet -r requirements.txt pyinstaller
 
 echo Building exe...
-python -m PyInstaller --noconfirm --onefile --windowed --name "GST-Invoice-Extractor" main.py
+:: --onedir (not --onefile) and --noupx: --onefile self-extracts to a temp
+:: folder on every launch, and UPX compression is heavily associated with
+:: malware packers -- both are the #1 triggers for Windows Defender flagging
+:: PyInstaller apps as "Trojan:Win32/Wacatac...!ml" (a heuristic false
+:: positive, not a real detection). --onedir avoids that pattern entirely.
+python -m PyInstaller --noconfirm --onedir --noupx --windowed --name "GST-Invoice-Extractor" main.py
 
 echo.
-echo Done. Find it at: dist\GST-Invoice-Extractor.exe
+echo Done. Find it at: dist\GST-Invoice-Extractor\GST-Invoice-Extractor.exe
+echo Zip the whole "GST-Invoice-Extractor" folder before distributing it.
 pause
